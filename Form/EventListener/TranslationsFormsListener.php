@@ -2,7 +2,8 @@
 
 namespace A2lix\TranslationFormBundle\Form\EventListener;
 
-use Symfony\Component\Form\FormEvent,
+use Doctrine\Common\Collections\Collection,
+    Symfony\Component\Form\FormEvent,
     Symfony\Component\Form\FormEvents,
     Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -22,12 +23,17 @@ class TranslationsFormsListener implements EventSubscriberInterface
         foreach ($data as $locale => $translation) {
             // Remove useless Translation object
             if (!$translation) {
-                $data->removeElement($translation);
-
+                if ($data instanceof Collection) {
+                    $data->removeElement($translation);
+                } else {
+                    unset($data[$locale]);
+                }
             } else {
                 $translation->setLocale($locale);
             }
         }
+
+        $event->setData($data);
     }
 
     public static function getSubscribedEvents()
